@@ -1,0 +1,293 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>郭宥皓遊戲世界｜反應力挑戰</title>
+<style>
+:root {
+  --bg: #080b18;
+  --purple: #a855f7;
+  --blue: #22d3ee;
+}
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: #fff;
+  font-family: system-ui, "Noto Sans TC", sans-serif;
+  background:
+    radial-gradient(ellipse at top, #24104c 0%, transparent 55%),
+    var(--bg);
+  display: flex;
+  justify-content: center;
+  padding: 24px 14px;
+}
+.container {
+  width: 100%;
+  max-width: 760px;
+}
+header {
+  text-align: center;
+  margin: 20px 0 28px;
+}
+.logo {
+  color: var(--blue);
+  font-size: 13px;
+  letter-spacing: 5px;
+  font-weight: bold;
+}
+h1 {
+  font-size: clamp(27px, 6vw, 44px);
+  margin: 12px 0;
+  background: linear-gradient(90deg, #22d3ee, #c084fc);
+  color: transparent;
+  background-clip: text;
+}
+.subtitle { color: #aaaac7; font-size: 14px; }
+
+.panel {
+  background: rgba(17, 20, 43, .92);
+  border: 1px solid #38305d;
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 0 35px #6d28d922;
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.stat {
+  text-align: center;
+  background: #090d20;
+  border: 1px solid #292749;
+  padding: 14px 4px;
+  border-radius: 12px;
+}
+.stat-label { color: #9ca3c7; font-size: 12px; }
+.stat-value {
+  font-size: clamp(23px, 5vw, 32px);
+  font-weight: 800;
+  margin-top: 5px;
+}
+#time { color: var(--blue); }
+#score { color: #c084fc; }
+#best { color: #facc15; }
+
+.arena {
+  position: relative;
+  height: 330px;
+  border: 1px solid #3e3470;
+  border-radius: 14px;
+  overflow: hidden;
+  background-color: #080c1d;
+  background-image:
+    linear-gradient(#27204b55 1px, transparent 1px),
+    linear-gradient(90deg, #27204b55 1px, transparent 1px);
+  background-size: 25px 25px;
+}
+#message {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
+  color: #b9b7d5;
+  line-height: 1.9;
+}
+#target {
+  display: none;
+  position: absolute;
+  width: 58px;
+  height: 58px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a855f7, #2563eb);
+  box-shadow: 0 0 15px #a855f7, 0 0 32px #22d3ee66;
+  cursor: pointer;
+  touch-action: manipulation;
+  animation: pulse .7s infinite alternate;
+}
+#target:active { transform: scale(.85); }
+
+@keyframes pulse {
+  to { box-shadow: 0 0 25px #c084fc, 0 0 42px #22d3ee; }
+}
+
+button.main {
+  width: 100%;
+  margin-top: 18px;
+  padding: 15px;
+  border: 0;
+  border-radius: 12px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #080b18;
+  background: linear-gradient(90deg, #22d3ee, #a78bfa);
+  cursor: pointer;
+  transition: .2s;
+}
+button.main:hover { filter: brightness(1.15); }
+button.main:disabled { opacity: .5; cursor: not-allowed; }
+
+.tip {
+  color: #9899b8;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.8;
+  margin: 15px 0 0;
+}
+footer {
+  text-align: center;
+  color: #656783;
+  font-size: 12px;
+  padding: 22px 0 8px;
+}
+</style>
+</head>
+<body>
+<main class="container">
+  <header>
+    <div class="logo">NEON GAMING · 2026</div>
+    <h1>郭宥皓遊戲世界</h1>
+    <div class="subtitle">REACTION CHALLENGE ／ 反應力挑戰</div>
+  </header>
+
+  <section class="panel">
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">剩餘時間</div>
+        <div class="stat-value" id="time">30</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">目前得分</div>
+        <div class="stat-value" id="score">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">最高紀錄</div>
+        <div class="stat-value" id="best">0</div>
+      </div>
+    </div>
+
+    <div class="arena" id="arena">
+      <div id="message">
+        <div>
+          <div style="font-size:38px">🎯</div>
+          <strong>準備好測試你的反應力了嗎？</strong><br>
+          點擊開始，30 秒內盡可能擊中發光目標！
+        </div>
+      </div>
+      <button id="target" aria-label="擊中目標"></button>
+    </div>
+
+    <button class="main" id="start">▶ 開始挑戰</button>
+    <p class="tip">
+      💡 點擊發光球得分，每次命中 +1 分<br>
+      挑戰結束後可以再玩一次，打破自己的紀錄！
+    </p>
+  </section>
+
+  <footer>© 2026 郭宥皓遊戲世界 · HAVE FUN!</footer>
+</main>
+
+<script>
+const arena = document.getElementById("arena");
+const target = document.getElementById("target");
+const message = document.getElementById("message");
+const startBtn = document.getElementById("start");
+const timeEl = document.getElementById("time");
+const scoreEl = document.getElementById("score");
+const bestEl = document.getElementById("best");
+
+let score = 0;
+let timeLeft = 30;
+let playing = false;
+let timer = null;
+
+let best = 0;
+try {
+  best = Number(localStorage.getItem("guoyouhao-best")) || 0;
+} catch (e) {}
+bestEl.textContent = best;
+
+function moveTarget() {
+  const maxX = Math.max(0, arena.clientWidth - target.offsetWidth);
+  const maxY = Math.max(0, arena.clientHeight - target.offsetHeight);
+
+  target.style.left = Math.random() * maxX + "px";
+  target.style.top = Math.random() * maxY + "px";
+}
+
+function endGame() {
+  playing = false;
+  clearInterval(timer);
+  target.style.display = "none";
+  message.style.display = "flex";
+  startBtn.disabled = false;
+  startBtn.textContent = "↻ 再玩一次";
+
+  const isNewBest = score > best;
+  if (isNewBest) {
+    best = score;
+    bestEl.textContent = best;
+    try {
+      localStorage.setItem("guoyouhao-best", String(best));
+    } catch (e) {}
+  }
+
+  message.innerHTML = `
+    <div>
+      <div style="font-size:42px">${isNewBest ? "🏆" : "🎮"}</div>
+      <strong style="font-size:23px;color:#c084fc">
+        挑戰結束！
+      </strong>
+      <div>你獲得 <strong style="color:#22d3ee">${score}</strong> 分</div>
+      <div>${isNewBest && score > 0 ? "✨ 新紀錄！太厲害了！" : "再挑戰一次，突破自己的紀錄！"}</div>
+    </div>`;
+}
+
+function startGame() {
+  clearInterval(timer);
+  score = 0;
+  timeLeft = 30;
+  playing = true;
+
+  scoreEl.textContent = score;
+  timeEl.textContent = timeLeft;
+  message.style.display = "none";
+  target.style.display = "block";
+  startBtn.disabled = true;
+  startBtn.textContent = "挑戰進行中…";
+
+  moveTarget();
+
+  timer = setInterval(() => {
+    timeLeft--;
+    timeEl.textContent = timeLeft;
+
+    if (timeLeft <= 0) {
+      endGame();
+    }
+  }, 1000);
+}
+
+target.addEventListener("pointerdown", (event) => {
+  event.preventDefault();
+  if (!playing) return;
+
+  score++;
+  scoreEl.textContent = score;
+  moveTarget();
+});
+
+startBtn.addEventListener("click", startGame);
+</script>
+</body>
+</html>
+
